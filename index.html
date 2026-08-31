@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Bir Sürprizim Var... ✨</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Outfit:wght@300;400;600;700&family=Sacramento&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0a0f1d;
+            --bg-card: rgba(18, 25, 44, 0.75);
+            --accent-gold: #f3d078;
+            --accent-gold-glow: rgba(243, 208, 120, 0.35);
+            --accent-rose: #ff758c;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-gold: rgba(243, 208, 120, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        } 
+
+        /* Arka Plan Partikül Tuvali */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Üst Ses/Müzik Butonu */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-gold);
+            padding: 10px 18px;
+            border-radius: 30px;
+            color: var(--accent-gold);
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .audio-control:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--accent-gold-glow);
+            background: rgba(243, 208, 120, 0.15);
+        }
+
+        /* ==========================================
+           1. KİLİTLİ GERİ SAYIM EKRANI
+           ========================================== */
+        #lock-screen {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .lock-badge {
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--accent-gold-glow)); }
+            100% { transform: scale(1.15); filter: drop-shadow(0 0 20px var(--accent-gold)); }
+        }
+
+        .lock-title {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .lock-subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+        }
+
+        /* Geri Sayım Kutuları */
+        .countdown-grid {
+            display: flex;
+            gap: 1.25rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .time-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 20px;
+            width: 110px;
+            height: 125px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(243, 208, 120, 0.05);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .time-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+        }
+
+        .time-val {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            line-height: 1;
+            text-shadow: 0 0 15px var(--accent-gold-glow);
+        }
+
+        .time-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .lock-note {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--border-gold);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ==========================================
+           2. SÜRPRIZ DOĞUM GÜNÜ İÇERİK EKRANI
+           ========================================== */
+        #surprise-screen {
+            position: relative;
+            z-index: 10;
+            display: none; /* JS ile açılacak */
+            opacity: 0;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem 6rem;
+            transition: opacity 1.5 ease;
+        }
+
+        /* Hero Başlık */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero-script {
+            font-family: 'Sacramento', cursive;
+            font-size: 3.5rem;
+            color: var(--accent-rose);
+            margin-bottom: -10px;
+        }
+
+        .hero-title{
+    font-family: 'Cinzel', serif;
+    font-size: 3.8rem;
+    font-weight: 700;
+    color: var(--accent-gold); /* Düz maskeleme yerine doğrudan canlı altın tonu */
+    text-shadow: 0 0 25px rgba(243, 208, 120, 0.5), 0 2px 5px rgba(0, 0, 0, 0.8); /* Derinlik ve parlama efekti */
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+}
+
+        .hero-desc {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Kart Konteynerleri */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-gold);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Mektup Alanı */
+        .letter-content {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: #e2e8f0;
+            white-space: pre-line;
+        }
+
+        .letter-signature {
+            font-family: 'Sacramento', cursive;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            text-align: right;
+            margin-top: 1.5rem;
+        }
+
+        /* Fotoğraf Galerisi (Polaroid Tarzı) */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .polaroid {
+            background: #ffffff;
+            padding: 15px 15px 25px 15px;
+            border-radius: 6px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform: rotate(-2deg);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .polaroid:nth-child(even) {
+            transform: rotate(3deg);
+        }
+
+        .polaroid:hover {
+            transform: scale(1.05) rotate(0deg);
+            z-index: 20;
+            box-shadow: 0 15px 35px rgba(243, 208, 120, 0.3);
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .polaroid-caption {
+            font-family: 'Sacramento', cursive;
+            font-size: 1.6rem;
+            color: #1e293b;
+            font-weight: bold;
+        }
+
+        /* Anı Zaman Çizelgesi */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px solid var(--border-gold);
+            margin-top: 1.5rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.6rem;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--accent-rose);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timeline-title {
+            font-size: 1.3rem;
+            color: var(--text-main);
+            margin: 4px 0 8px;
+        }
+
+        .timeline-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* İnteraktif Kalp Butonu */
+        .interactive-section {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .heart-btn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(255, 65, 108, 0.4);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .heart-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 15px 35px rgba(255, 65, 108, 0.6);
+        }
+
+        /* Sol Alt Önizleme / Test Modu Butonu */
+        .dev-preview-btn {
+            position: fixed;
+            bottom: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #94a3b8;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .dev-preview-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        /* Responsive Uyum */
+        @media (max-width: 640px) {
+            .lock-title { font-size: 1.8rem; }
+            .time-card { width: 75px; height: 95px; }
+            .time-val { font-size: 1.9rem; }
+            .hero-title { font-size: 2.4rem; }
+            .glass-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="lockMusic" src="kilit.mp3" loop preload="none"></audio>
+<audio id="unlockedMusic" src="surpriz.mp3" loop preload="none"></audio>
+
+    <!-- Arka Plan Tuvali -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Müzik Kontrol Butonu -->
+    <button class="audio-control" id="audioToggle">
+        <i class="fa-solid fa-music"></i>
+        <span id="audioText">Müziği Başlat</span>
+    </button>
+
+    <!-- Dev / Test Modu Butonu (3 Eylül'ü Beklemeden Önizleme Yapmak İçin) -->
+    <button class="dev-preview-btn" id="devToggleBtn">
+        <i class="fa-solid fa-eye"></i> Sürprizi Test Et (Önizleme)
+    </button>
+
+    <!-- 1) KİLİTLİ GERİ SAYIM EKRANI -->
+    <div id="lock-screen">
+        <div class="lock-badge">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+        <h1 class="lock-title">Sana Özel Bir Sürpriz Yolda... ✨</h1>
+        <p class="lock-subtitle">Bu özel sayfanın kapıları sadece zamanı geldiğinde açılacak. Sabırla bekle!</p>
+
+        <!-- Canlı Sayaç -->
+        <div class="countdown-grid">
+            <div class="time-card">
+                <span class="time-val" id="days">00</span>
+                <span class="time-label">GÜN</span>
+            </div>
+            <div class="time-card">
+                <span class="time-val" id="hours">00</span>
+                <span class="time-label">SAAT</span>
+            </div>
+            <div class="time-card">
+                <span class="time-val" id="minutes">00</span>
+                <span class="time-label">DAKİKA</span>
+            </div>
+            <div class="time-card">
+                <span class="time-val" id="seconds">00</span>
+                <span class="time-label">SANİYE</span>
+            </div>
+        </div>
+
+        <div class="lock-note">
+            <i class="fa-solid fa-sparkles" style="color: var(--accent-gold);"></i>
+            Bu kapı <strong>3 Eylül 00:00</strong>'da kendiliğinden açılacaktır. ❤️
+        </div>
+    </div>
+
+    <!-- 2) AÇILACAK SÜRPRIZ DOĞUM GÜNÜ EKRANI -->
+    <div id="surprise-screen">
+        <!-- Hero Başlık -->
+        <header class="hero-section">
+            <div class="hero-script">İyi ki Doğdun Ömrümm</div>
+            <h1 class="hero-title">NİCE MUTLU YILLARA! 🎉</h1>
+            <p class="hero-desc">
+                Bugün senin günün! Hayatıma kattığın tüm güzellikler, gülüşler ve unutulmaz anlar için teşekkür ederim. Yeni yaşın sana mucizeler getirsin.
+            </p>
+        </header>
+
+        <!-- Sürpriz Mektup Kartı -->
+        <section class="glass-card">
+            <h2 class="card-title">
+                <i class="fa-solid fa-envelope-open-text"></i> Sana Bir Notum Var
+            </h2>
+            <div class="letter-content">
+Birlikte kutladığımız 2. Doğum günün. Seni tanıdığımda 19 yaşındaydın şimdi 21 oldun zaman ne çabuk akıyor sevgilim gün geçtikçe yaşlanıyoruz ama yaşlanmanında bi güzelliği olmalı yanımda sen olmalısın. El ele yan yana geçirdigimiz 2. Yılımız bu iki yıl bana çok şey kattı hayatın tadını seninleyken aldım. Gerçekten yaşadığımı seninleyken anladım sevilmenin tadına seninle vardım. Aşkı seninle tattım, yaşlılığımı da seninle tadıp seninle yaşamak istiyorum sevgilim hayatımın her anında her saniyesinde yan yana olalım. Yeni yaşın kutlu olsun sevdam iyiki doğmuşsun iyiki yârim olmuşsun nice mutlu huzurlu ve huysuzlu yılların olsun. Seni çok seviyorum iyi'ki doğmuşsun, iyi'ki beni bulmuşsun. 💖
+            </div>
+            <div class="letter-signature">Seni Çok Seven Huysuzun...</div>
+        </section>
+
+        <!-- Polaroid Fotoğraf Galerisi -->
+        <section class="glass-card">
+            <h2 class="card-title">
+                <i class="fa-solid fa-camera-retro"></i> En Özel Anlarımız
+            </h2>
+            <div class="photo-grid">
+                <div class="polaroid">
+                    <img src="resim1.jpeg" alt="Anı 1">
+                    <div class="polaroid-caption">Ufak Bi Sürpriz</div>
+                </div>
+                <div class="polaroid">
+                    <img src="resim2.jpeg" alt="Anı 2">
+                    <div class="polaroid-caption">En Tatlı Gülüşün </div>
+                </div>
+                <div class="polaroid">
+                    <img src="resim3.jpeg" alt="Anı 3">
+                    <div class="polaroid-caption">Birlikte Keşifle </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Zaman Çizelgesi -->
+        <section class="glass-card">
+            <h2 class="card-title">
+                <i class="fa-solid fa-timeline"></i> Unutulmaz Yolculuğumuz
+            </h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">İlk tek buluşmamız</div>
+                    <div class="timeline-title">Her Şeyin başlangıcı An 💫</div>
+                    <div class="timeline-desc"> Tüm hikayemiz kuleliye giden bir otobus duragında tekrardan yazıldı.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Unutulmaz Anı</div>
+                    <div class="timeline-title">birlikte yedığimiz ilk dondurma ✈️</div>
+                    <div class="timeline-desc">saatlerce sohbet ettiğimiz ve dondurma yediğimiz o harika gün,benimkinden poşet çıkmayaydı iyidi.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">Bugün - 3 Eylül</div>
+                    <div class="timeline-title">Yeni Yaşın Kutlu Olsun Ceylanımm. 🎂</div>
+                    <div class="timeline-desc">Yeni yaşında da tüm güzellikler seninle olsun, birlikte daha yazılacak çok hikayemiz var.</div>
+                </div>
+            </div>
+        </section>
+
+       
+    </div>
+
+    <!-- Konfeti Tuvali -->
+    <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:99;"></canvas>
+
+    <!-- JavaScript Kod Mantığı -->
+    <script>
+        // ==========================================
+        // 1. HEDEF TARİH AYARI (3 EYLÜL 00:00:00)
+        // ==========================================
+        // Not: Yıl mevcut yıla göre ayarlanır. (Eğer Eylül ayı geçtiyse sonraki yıla hedefler)
+        const now = new Date();
+        let targetYear = now.getFullYear();
+        // Eğer şu an eylül 3'ten sonraysa önümüzdeki yılı baz al
+        let targetDate = new Date(`September 3, ${targetYear} 00:00:00`).getTime();
+        
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        
+        const lockScreen = document.getElementById('lock-screen');
+        const surpriseScreen = document.getElementById('surprise-screen');
+        let isUnlocked = false;
+         // Sayaç 00:00:00 olduğunda çalışan mevcut kodlarının içine:
+var lockAudio = document.getElementById('lockMusic');
+var unlockedAudio = document.getElementById('unlockedMusic');
+
+if (lockAudio) { lockAudio.pause(); lockAudio.currentTime = 0; }
+if (unlockedAudio) { unlockedAudio.load(); unlockedAudio.play(); }
+        // Geri Sayım Fonksiyonu
+        function updateCountdown() {
+            if(isUnlocked) return;
+
+            const currentTime = new Date().getTime();
+            const diff = targetDate - currentTime;
+
+            if (diff <= 0) {
+                unlockSurprise();
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            daysEl.innerText = d < 10 ? '0' + d : d;
+            hoursEl.innerText = h < 10 ? '0' + h : h;
+            minutesEl.innerText = m < 10 ? '0' + m : m;
+            secondsEl.innerText = s < 10 ? '0' + s : s;
+        }
+
+        const timerInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Kilit Açılma Aksiyonu
+        function unlockSurprise() {
+            isUnlocked = true;
+            clearInterval(timerInterval);
+
+            // Yumuşak geçiş
+            lockScreen.style.opacity = '0';
+            lockScreen.style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                lockScreen.style.display = 'none';
+                surpriseScreen.style.display = 'block';
+                setTimeout(() => {
+                    surpriseScreen.style.opacity = '1';
+                    launchConfetti();
+                }, 50);
+            }, 800);
+        }
+
+        // ==========================================
+        // 2. DEV PREVIEW / TEST MODU BUTONU
+        // ==========================================
+        const devToggleBtn = document.getElementById('devToggleBtn');
+        let previewMode = false;
+
+        devToggleBtn.addEventListener('click', () => {
+            previewMode = !previewMode;
+            if (previewMode) {
+                unlockSurprise();
+                devToggleBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Kilitli Ekranı Göster';
+            } else {
+                isUnlocked = false;
+                surpriseScreen.style.display = 'none';
+                surpriseScreen.style.opacity = '0';
+                lockScreen.style.display = 'flex';
+                setTimeout(() => {
+                    lockScreen.style.opacity = '1';
+                    lockScreen.style.transform = 'scale(1)';
+                }, 50);
+                devToggleBtn.innerHTML = '<i class="fa-solid fa-eye"></i> Sürprizi Test Et (Önizleme)';
+            }
+        });
+
+        // ==========================================
+  
+        function toggleAudio() {
+            if (!isPlaying) {
+                startAmbientMusic();
+                audioText.innerText = "Müziği Durdur";
+                audioBtn.style.borderColor = "var(--accent-rose)";
+                isPlaying = true;
+            } else {
+                stopAmbientMusic();
+                audioText.innerText = "Müziği Başlat";
+                audioBtn.style.borderColor = "var(--border-gold)";
+                isPlaying = false;
+            }
+        }
+
+        function startAmbientMusic() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = [261.63, 329.63, 392.00, 523.25]; // C E G C akoru
+            
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // Yavaş nefes alan ses dalgası
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.05, audioCtx.currentTime + 2 + idx);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                oscList.push({ osc, gain });
+            });
+        }
+
+        function stopAmbientMusic() {
+            if (audioCtx) {
+                oscList.forEach(item => {
+                    item.gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1);
+                    setTimeout(() => item.osc.stop(), 1000);
+                });
+                oscList = [];
+            }
+        }
+
+        audioBtn.addEventListener('click', toggleAudio);
+
+        // ==========================================
+        // 4. PARÇACIKLI ARKA PLAN (BOKEH EFFECT)
+        // ==========================================
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedY = -(Math.random() * 0.5 + 0.2);
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.fadeSpeed = Math.random() * 0.005 + 0.002;
+            }
+            update() {
+                this.y += this.speedY;
+                if (this.y < 0) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(243, 208, 120, ${this.opacity})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#f3d078';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // ==========================================
+        // 5. KONFETİ VE SEVGİ EKRAN EFEKTİ
+        // ==========================================
+        const confCanvas = document.getElementById('confetti-canvas');
+        const confCtx = confCanvas.getContext('2d');
+        let confetti = [];
+
+        function resizeConfetti() {
+            confCanvas.width = window.innerWidth;
+            confCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfetti);
+        resizeConfetti();
+
+        function launchConfetti() {
+            for (let i = 0; i < 120; i++) {
+                confetti.push({
+                    x: Math.random() * confCanvas.width,
+                    y: Math.random() * confCanvas.height - confCanvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: ['#ff758c', '#f3d078', '#38bdf8', '#a7f3d0'][Math.floor(Math.random() * 4)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+            confetti.forEach((c, index) => {
+                c.y += c.speedY;
+                c.x += c.speedX;
+                c.rotation += 2;
+
+                confCtx.save();
+                confCtx.translate(c.x, c.y);
+                confCtx.rotate((c.rotation * Math.PI) / 180);
+                confCtx.fillStyle = c.color;
+                confCtx.fillRect(-c.size / 2, -c.size / 2, c.size, c.size);
+                confCtx.restore();
+
+                if (c.y > confCanvas.height) confetti.splice(index, 1);
+            });
+
+            if (confetti.length > 0) requestAnimationFrame(animateConfetti);
+        }
+
+        // Kalp Butonu Efekti
+        document.getElementById('sendLoveBtn').addEventListener('click', (e) => {
+            for(let i=0; i<15; i++) {
+                createHeart(e.clientX, e.clientY);
+            }
+        });
+        // Müzik Başlat / Durdur Buton Mantığı (Sayacı etkilemez)
+const audioBtn = document.getElementById('audioToggle');
+const audioText = document.getElementById('audioText');
+
+if (audioBtn) {
+    audioBtn.addEventListener('click', function() {
+        const lockAudio = document.getElementById('lockMusic');
+        const unlockedAudio = document.getElementById('unlockedMusic');
+
+        // Sayacın bittiğini ekrandaki kilit durumundan veya kilit ekranının görünürlüğünden anlarız
+        const lockScreen = document.getElementById('lock-screen');
+        const isUnlocked = lockScreen && lockScreen.style.display === 'none';
+        const activeAudio = isUnlocked ? unlockedAudio : lockAudio;
+
+        if (activeAudio) {
+            if (activeAudio.paused) {
+                activeAudio.load();
+                activeAudio.play().then(function() {
+                    if (audioText) audioText.textContent = "Müziği Durdur";
+                }).catch(function(err) {
+                    console.log("Ses hatası:", err);
+                });
+            } else {
+                activeAudio.pause();
+                if (audioText) audioText.textContent = "Müziği Başlat";
+            }
+        }
+    });
+}
+
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.style.position = 'fixed';
+            heart.style.left = (x + (Math.random() * 60 - 30)) + 'px';
+            heart.style.top = y + 'px';
+            heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+            heart.style.pointerEvents = 'none';
+            heart.style.transition = 'all 1.5s ease-out';
+            heart.style.zIndex = '1000';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.style.transform = `translateY(-${Math.random() * 150 + 100}px) scale(1.5)`;
+                heart.style.opacity = '0';
+            }, 50);
+
+            setTimeout(() => heart.remove(), 1600);
+        }
+        // Geri sayım ve kilit açma fonksiyonun
+    function kilitAc() { // Veya fonksiyon adın ne ise (örn: showSurprise)
+        
+        // --------------------------------------------------
+        // MÜZİK GEÇİŞ KODLARI BURAYA GELECEK:
+        
+        // 1. Kilit müziğini durdur
+        var lockAudio = document.getElementById('lockMusic');
+        if (lockAudio) {
+            lockAudio.pause();
+            lockAudio.currentTime = 0;
+        }
+
+        // 2. Sürpriz müziğini başlat
+        var unlockedAudio = document.getElementById('unlockedMusic');
+        if (unlockedAudio) {
+            unlockedAudio.play().catch(function(error) {
+                console.log("Müzik otomatik başlatılamadı:", error);
+            });
+        }
+        // --------------------------------------------------
+
+        // Kilit açıldığında gizli içerikleri gösteren diğer kodların...
+        document.getElementById('lock-screen').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    }
+
+    </script>
+</body>
+</html>
